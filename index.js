@@ -1048,7 +1048,7 @@ function renderApp() {
                 </div>
               </div>
 
-              <!-- Main Cover Image -->
+              <!-- Main Cover Image with Interactive Framing & Cropping Suite -->
               <div class="input-group">
                 <label>Main Visual (Front Cover / Key Art) *</label>
                 <div class="admin-file-picker" id="adminFileDropZone">
@@ -1061,9 +1061,60 @@ function renderApp() {
                   <span style="font-size: 0.8rem; color: var(--text-muted);">Or direct URL / path:</span>
                   <input type="text" id="newProjImageUrl" class="input-field" style="padding: 8px 12px; font-size: 0.85rem;" placeholder="/images/filename.png or image URL" />
                 </div>
-                <div id="newProjImagePreview" class="admin-preview-box">
-                  <img id="previewImgEl" src="" alt="Preview" />
-                  <span style="font-size: 0.85rem; color: var(--text-secondary);">Main artwork ready</span>
+
+                <!-- Interactive Preview Box & Crop Toolbar -->
+                <div id="newProjImagePreview" class="admin-preview-box" style="display: none; flex-direction: column; align-items: stretch; gap: 14px;">
+                  <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                    <div style="position: relative; width: 92px; height: 92px; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--border-subtle); flex-shrink: 0; background: #000;">
+                      <img id="previewImgEl" src="" alt="Preview" style="width: 100%; height: 100%; object-fit: cover;" />
+                    </div>
+                    <div style="flex: 1; min-width: 220px;">
+                      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                        <span style="font-size: 0.92rem; font-weight: 700; color: #fff;">Artwork Ready</span>
+                        <span id="cropStatusBadge" class="crop-status-badge" style="display: none;">
+                          <i class="fas fa-check-circle"></i> Recadré
+                        </span>
+                      </div>
+                      <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0 0 10px;">
+                        Ajustez le cadrage, zoomez et prévisualisez le rendu exact sur les cartes du site.
+                      </p>
+                      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button type="button" class="btn-crop-trigger" id="btnOpenCropper">
+                          <i class="fas fa-crop-alt"></i> Recadrer & Ajuster l'Aperçu
+                        </button>
+                        <button type="button" class="btn-crop-reset" id="btnResetCropImage" style="display: none;">
+                          <i class="fas fa-undo"></i> Réinitialiser original
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Live Dual Card Simulation (See how it looks in real site components) -->
+                  <div class="crop-live-simulations">
+                    <div class="crop-sim-column">
+                      <span class="crop-sim-label"><i class="fas fa-th-large"></i> Aperçu Grille Carrée (All Projects)</span>
+                      <div class="sim-square-card">
+                        <img id="simSquareImg" src="" alt="Aperçu Carré" />
+                        <div class="sim-card-badge">Vignette 1:1</div>
+                        <div class="sim-card-footer">
+                          <span class="sim-card-cat" id="simCardCatPreview">Posters & Key Visuals</span>
+                          <h5 class="sim-card-title" id="simCardTitlePreview">Titre du Projet</h5>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="crop-sim-column">
+                      <span class="crop-sim-label"><i class="fas fa-columns"></i> Aperçu Carte Bento (Page d'Accueil)</span>
+                      <div class="sim-bento-card">
+                        <img id="simBentoImg" src="" alt="Aperçu Bento" />
+                        <div class="sim-card-badge">Carte Bento</div>
+                        <div class="sim-card-footer">
+                          <span class="sim-card-cat" id="simBentoCatPreview">Posters & Key Visuals</span>
+                          <h5 class="sim-card-title" id="simBentoTitlePreview">Titre du Projet</h5>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -1199,6 +1250,115 @@ function renderApp() {
               </button>
             </form>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Studio Interactive Cropper & Framing Modal -->
+    <div id="studioCropperModal" class="cropper-modal" aria-hidden="true">
+      <div class="cropper-dialog">
+        <div class="cropper-dialog-header">
+          <div class="cropper-dialog-title">
+            <i class="fas fa-crop-alt"></i>
+            <div>
+              <h3>Studio Framing & Cropper</h3>
+              <p>Recadrez et ajustez votre visuel pour un rendu galerie parfait</p>
+            </div>
+          </div>
+          <button type="button" class="cropper-close-btn" id="btnCloseCropper" aria-label="Close cropper">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="cropper-dialog-body">
+          <!-- Canvas Viewport with Grid Overlay -->
+          <div class="cropper-canvas-wrapper" id="cropperCanvasWrapper">
+            <div class="cropper-viewport" id="cropperViewport">
+              <img id="cropperSourceImg" src="" alt="Source for crop" draggable="false" />
+              <!-- Framing Overlay with Rule of Thirds Guides -->
+              <div class="cropper-grid-overlay" id="cropperGridOverlay">
+                <div class="grid-line-h line-1"></div>
+                <div class="grid-line-h line-2"></div>
+                <div class="grid-line-v line-1"></div>
+                <div class="grid-line-v line-2"></div>
+              </div>
+            </div>
+            <div class="cropper-drag-hint">
+              <i class="fas fa-hand-rock"></i> Cliquez et glissez pour déplacer · Molette pour zoomer
+            </div>
+          </div>
+
+          <!-- Controls Sidebar / Toolbar -->
+          <div class="cropper-controls-panel">
+            <div class="control-section">
+              <label class="control-label">Ratio de Cadrage (Aspect Ratio)</label>
+              <div class="aspect-ratio-selector" id="cropperRatioSelector">
+                <button type="button" class="aspect-btn active" data-ratio="1:1">
+                  <i class="fas fa-square"></i>
+                  <span>1:1 Carré</span>
+                  <small>Albums & All Projects</small>
+                </button>
+                <button type="button" class="aspect-btn" data-ratio="3:4">
+                  <i class="fas fa-portrait"></i>
+                  <span>3:4 Affiche</span>
+                  <small>Poster Vertical</small>
+                </button>
+                <button type="button" class="aspect-btn" data-ratio="16:9">
+                  <i class="fas fa-image"></i>
+                  <span>16:9 Paysage</span>
+                  <small>Hero & Bannières</small>
+                </button>
+                <button type="button" class="aspect-btn" data-ratio="free">
+                  <i class="fas fa-expand"></i>
+                  <span>Libre</span>
+                  <small>Original</small>
+                </button>
+              </div>
+            </div>
+
+            <!-- Zoom Controller -->
+            <div class="control-section">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label class="control-label" style="margin: 0;">Zoom de l'image</label>
+                <span id="cropperZoomVal" style="font-size: 0.82rem; font-weight: 700; color: var(--accent-cobalt-light);">100%</span>
+              </div>
+              <div class="zoom-slider-row">
+                <button type="button" class="btn-zoom-step" id="btnZoomOut"><i class="fas fa-minus"></i></button>
+                <input type="range" id="cropperZoomSlider" min="1" max="3" step="0.01" value="1" class="crop-slider" />
+                <button type="button" class="btn-zoom-step" id="btnZoomIn"><i class="fas fa-plus"></i></button>
+              </div>
+            </div>
+
+            <!-- Rotation / Center Controller -->
+            <div class="control-section">
+              <label class="control-label">Orientation & Alignement</label>
+              <div style="display: flex; gap: 8px;">
+                <button type="button" class="btn-secondary" id="btnRotate90" style="flex: 1; padding: 8px 12px; font-size: 0.82rem;">
+                  <i class="fas fa-redo"></i> Pivoter 90°
+                </button>
+                <button type="button" class="btn-secondary" id="btnCenterCrop" style="flex: 1; padding: 8px 12px; font-size: 0.82rem;">
+                  <i class="fas fa-crosshairs"></i> Recentrer
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Mini Preview -->
+            <div class="control-section">
+              <label class="control-label">Aperçu Réel du Rendu</label>
+              <div class="cropper-mini-preview-wrap">
+                <canvas id="cropperLivePreviewCanvas" width="220" height="220"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="cropper-dialog-footer">
+          <button type="button" class="btn-secondary" id="btnCancelCropper">
+            Annuler
+          </button>
+          <button type="button" class="btn-primary" id="btnApplyCropper">
+            <i class="fas fa-check"></i> Valider et Appliquer le Recadrage
+          </button>
         </div>
       </div>
     </div>
@@ -1968,35 +2128,385 @@ function setupAdminPanelHandlers() {
     }
   });
 
-  // Main Cover File Picker for New Project
+  // ==========================================================================
+  // STUDIO IMAGE CROPPER & LIVE RE-FRAMING SUITE
+  // ==========================================================================
   const dropZone = document.getElementById('adminFileDropZone');
   const fileInput = document.getElementById('adminFileInput');
   const imageUrlInput = document.getElementById('newProjImageUrl');
   const previewBox = document.getElementById('newProjImagePreview');
   const previewImgEl = document.getElementById('previewImgEl');
+  const simSquareImg = document.getElementById('simSquareImg');
+  const simBentoImg = document.getElementById('simBentoImg');
+  const simCardTitlePreview = document.getElementById('simCardTitlePreview');
+  const simBentoTitlePreview = document.getElementById('simBentoTitlePreview');
+  const simCardCatPreview = document.getElementById('simCardCatPreview');
+  const simBentoCatPreview = document.getElementById('simBentoCatPreview');
+  const cropStatusBadge = document.getElementById('cropStatusBadge');
+  const btnResetCropImage = document.getElementById('btnResetCropImage');
+  const btnOpenCropper = document.getElementById('btnOpenCropper');
+
+  // Cropper Modal Elements
+  const cropperModal = document.getElementById('studioCropperModal');
+  const btnCloseCropper = document.getElementById('btnCloseCropper');
+  const btnCancelCropper = document.getElementById('btnCancelCropper');
+  const btnApplyCropper = document.getElementById('btnApplyCropper');
+  const cropperViewport = document.getElementById('cropperViewport');
+  const cropperSourceImg = document.getElementById('cropperSourceImg');
+  const cropperZoomSlider = document.getElementById('cropperZoomSlider');
+  const cropperZoomVal = document.getElementById('cropperZoomVal');
+  const btnZoomIn = document.getElementById('btnZoomIn');
+  const btnZoomOut = document.getElementById('btnZoomOut');
+  const btnRotate90 = document.getElementById('btnRotate90');
+  const btnCenterCrop = document.getElementById('btnCenterCrop');
+  const cropperLivePreviewCanvas = document.getElementById('cropperLivePreviewCanvas');
+  const cropperRatioSelector = document.getElementById('cropperRatioSelector');
+
+  let rawOriginalImageSrc = '';
+  let cropState = {
+    zoom: 1,
+    panX: 0,
+    panY: 0,
+    rotation: 0,
+    ratio: '1:1'
+  };
+
+  function updateLiveSimulationCards(src) {
+    if (previewImgEl) previewImgEl.src = src;
+    if (simSquareImg) simSquareImg.src = src;
+    if (simBentoImg) simBentoImg.src = src;
+    if (previewBox) previewBox.style.display = 'flex';
+  }
+
+  function syncCardTitles() {
+    const titleVal = document.getElementById('newProjTitle')?.value.trim() || 'Titre du Projet';
+    const catVal = document.getElementById('newProjCategory')?.value || 'Posters & Key Visuals';
+    if (simCardTitlePreview) simCardTitlePreview.textContent = titleVal;
+    if (simBentoTitlePreview) simBentoTitlePreview.textContent = titleVal;
+    if (simCardCatPreview) simCardCatPreview.textContent = catVal;
+    if (simBentoCatPreview) simBentoCatPreview.textContent = catVal;
+  }
+
+  document.getElementById('newProjTitle')?.addEventListener('input', syncCardTitles);
+  document.getElementById('newProjCategory')?.addEventListener('change', syncCardTitles);
+
+  function handleLoadedImage(dataUrl) {
+    rawOriginalImageSrc = dataUrl;
+    imageUrlInput.value = dataUrl;
+    cropState = { zoom: 1, panX: 0, panY: 0, rotation: 0, ratio: '1:1' };
+    if (cropStatusBadge) cropStatusBadge.style.display = 'none';
+    if (btnResetCropImage) btnResetCropImage.style.display = 'none';
+    updateLiveSimulationCards(dataUrl);
+    syncCardTitles();
+  }
 
   dropZone?.addEventListener('click', () => fileInput?.click());
+
+  // Drag and drop onto upload box
+  dropZone?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = 'var(--accent-cobalt)';
+    dropZone.style.background = 'rgba(37, 99, 235, 0.08)';
+  });
+
+  dropZone?.addEventListener('dragleave', () => {
+    dropZone.style.borderColor = '';
+    dropZone.style.background = '';
+  });
+
+  dropZone?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.style.borderColor = '';
+    dropZone.style.background = '';
+    const file = e.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (loadEvent) => handleLoadedImage(loadEvent.target.result);
+      reader.readAsDataURL(file);
+    }
+  });
 
   fileInput?.addEventListener('change', (e) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        const dataUrl = loadEvent.target.result;
-        imageUrlInput.value = dataUrl;
-        previewImgEl.src = dataUrl;
-        previewBox.style.display = 'flex';
-      };
+      reader.onload = (loadEvent) => handleLoadedImage(loadEvent.target.result);
       reader.readAsDataURL(file);
     }
   });
 
   imageUrlInput?.addEventListener('input', () => {
-    if (imageUrlInput.value.trim()) {
-      previewImgEl.src = imageUrlInput.value.trim();
-      previewBox.style.display = 'flex';
+    const val = imageUrlInput.value.trim();
+    if (val) {
+      handleLoadedImage(val);
     } else {
-      previewBox.style.display = 'none';
+      if (previewBox) previewBox.style.display = 'none';
+    }
+  });
+
+  // Reset to raw original image
+  btnResetCropImage?.addEventListener('click', () => {
+    if (rawOriginalImageSrc) {
+      imageUrlInput.value = rawOriginalImageSrc;
+      cropState = { zoom: 1, panX: 0, panY: 0, rotation: 0, ratio: '1:1' };
+      updateLiveSimulationCards(rawOriginalImageSrc);
+      if (cropStatusBadge) cropStatusBadge.style.display = 'none';
+      if (btnResetCropImage) btnResetCropImage.style.display = 'none';
+      showAdminToast("Image réinitialisée à l'original.");
+    }
+  });
+
+  // Open Cropper Modal
+  btnOpenCropper?.addEventListener('click', () => {
+    const currentSrc = imageUrlInput.value.trim() || rawOriginalImageSrc;
+    if (!currentSrc) {
+      alert("Veuillez d'abord importer une image pour la recadrer.");
+      return;
+    }
+
+    cropperSourceImg.src = currentSrc;
+    cropperModal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+
+    cropperSourceImg.onload = () => {
+      applyViewportAspect(cropState.ratio);
+      updateCropperTransform();
+      renderLiveMiniCanvas();
+    };
+
+    if (cropperSourceImg.complete) {
+      applyViewportAspect(cropState.ratio);
+      updateCropperTransform();
+      renderLiveMiniCanvas();
+    }
+  });
+
+  function closeCropperModal() {
+    cropperModal.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  btnCloseCropper?.addEventListener('click', closeCropperModal);
+  btnCancelCropper?.addEventListener('click', closeCropperModal);
+  cropperModal?.addEventListener('click', (e) => {
+    if (e.target === cropperModal) closeCropperModal();
+  });
+
+  function applyViewportAspect(ratio) {
+    if (!cropperViewport) return;
+    cropState.ratio = ratio;
+    
+    // Update ratio buttons active state
+    cropperRatioSelector?.querySelectorAll('.aspect-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.ratio === ratio);
+    });
+
+    if (ratio === '1:1') {
+      cropperViewport.style.width = '360px';
+      cropperViewport.style.height = '360px';
+    } else if (ratio === '3:4') {
+      cropperViewport.style.width = '285px';
+      cropperViewport.style.height = '380px';
+    } else if (ratio === '16:9') {
+      cropperViewport.style.width = '400px';
+      cropperViewport.style.height = '225px';
+    } else { // free
+      if (cropperSourceImg.naturalWidth && cropperSourceImg.naturalHeight) {
+        const aspect = cropperSourceImg.naturalWidth / cropperSourceImg.naturalHeight;
+        if (aspect >= 1) {
+          cropperViewport.style.width = '380px';
+          cropperViewport.style.height = `${Math.round(380 / aspect)}px`;
+        } else {
+          cropperViewport.style.height = '380px';
+          cropperViewport.style.width = `${Math.round(380 * aspect)}px`;
+        }
+      } else {
+        cropperViewport.style.width = '360px';
+        cropperViewport.style.height = '360px';
+      }
+    }
+  }
+
+  cropperRatioSelector?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.aspect-btn');
+    if (btn) {
+      applyViewportAspect(btn.dataset.ratio);
+      updateCropperTransform();
+      renderLiveMiniCanvas();
+    }
+  });
+
+  function updateCropperTransform() {
+    if (!cropperSourceImg) return;
+    cropperSourceImg.style.transform = `translate(calc(-50% + ${cropState.panX}px), calc(-50% + ${cropState.panY}px)) scale(${cropState.zoom}) rotate(${cropState.rotation}deg)`;
+    if (cropperZoomVal) cropperZoomVal.textContent = `${Math.round(cropState.zoom * 100)}%`;
+    if (cropperZoomSlider) cropperZoomSlider.value = cropState.zoom;
+  }
+
+  // Zoom slider
+  cropperZoomSlider?.addEventListener('input', (e) => {
+    cropState.zoom = parseFloat(e.target.value);
+    updateCropperTransform();
+    renderLiveMiniCanvas();
+  });
+
+  btnZoomIn?.addEventListener('click', () => {
+    cropState.zoom = Math.min(3, cropState.zoom + 0.15);
+    updateCropperTransform();
+    renderLiveMiniCanvas();
+  });
+
+  btnZoomOut?.addEventListener('click', () => {
+    cropState.zoom = Math.max(1, cropState.zoom - 0.15);
+    updateCropperTransform();
+    renderLiveMiniCanvas();
+  });
+
+  // Wheel zoom
+  cropperViewport?.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 0.08 : -0.08;
+    cropState.zoom = Math.max(1, Math.min(3, cropState.zoom + delta));
+    updateCropperTransform();
+    renderLiveMiniCanvas();
+  }, { passive: false });
+
+  // Rotate 90
+  btnRotate90?.addEventListener('click', () => {
+    cropState.rotation = (cropState.rotation + 90) % 360;
+    updateCropperTransform();
+    renderLiveMiniCanvas();
+  });
+
+  // Center crop
+  btnCenterCrop?.addEventListener('click', () => {
+    cropState.panX = 0;
+    cropState.panY = 0;
+    cropState.zoom = 1;
+    cropState.rotation = 0;
+    updateCropperTransform();
+    renderLiveMiniCanvas();
+  });
+
+  // Pan / Dragging
+  let isDragging = false;
+  let startX = 0;
+  let startY = 0;
+  let initialPanX = 0;
+  let initialPanY = 0;
+
+  function onPointerDown(e) {
+    isDragging = true;
+    const clientX = e.clientX || e.touches?.[0]?.clientX || 0;
+    const clientY = e.clientY || e.touches?.[0]?.clientY || 0;
+    startX = clientX;
+    startY = clientY;
+    initialPanX = cropState.panX;
+    initialPanY = cropState.panY;
+  }
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+    const clientX = e.clientX || e.touches?.[0]?.clientX || 0;
+    const clientY = e.clientY || e.touches?.[0]?.clientY || 0;
+    const dx = clientX - startX;
+    const dy = clientY - startY;
+    cropState.panX = initialPanX + dx;
+    cropState.panY = initialPanY + dy;
+    updateCropperTransform();
+    renderLiveMiniCanvas();
+  }
+
+  function onPointerUp() {
+    if (isDragging) {
+      isDragging = false;
+      renderLiveMiniCanvas();
+    }
+  }
+
+  cropperViewport?.addEventListener('mousedown', onPointerDown);
+  window.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('mouseup', onPointerUp);
+
+  cropperViewport?.addEventListener('touchstart', onPointerDown, { passive: true });
+  window.addEventListener('touchmove', onPointerMove, { passive: true });
+  window.addEventListener('touchend', onPointerUp, { passive: true });
+
+  // Render Mini Preview Canvas and Output Canvas
+  function drawFramedImageOnCanvas(canvas) {
+    if (!canvas || !cropperSourceImg || !cropperViewport) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const Vw = cropperViewport.offsetWidth || 360;
+    const Vh = cropperViewport.offsetHeight || 360;
+    const Iw = cropperSourceImg.naturalWidth || 1000;
+    const Ih = cropperSourceImg.naturalHeight || 1000;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+
+    // Fill dark background
+    ctx.fillStyle = '#09090c';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const scaleFactor = canvas.width / Vw;
+
+    ctx.translate(canvas.width / 2 + cropState.panX * scaleFactor, canvas.height / 2 + cropState.panY * scaleFactor);
+    ctx.rotate((cropState.rotation * Math.PI) / 180);
+
+    // Compute base image fit inside viewport (cover fit)
+    const baseScale = Math.max(Vw / Iw, Vh / Ih);
+    const drawW = Iw * baseScale * cropState.zoom * scaleFactor;
+    const drawH = Ih * baseScale * cropState.zoom * scaleFactor;
+
+    ctx.drawImage(cropperSourceImg, -drawW / 2, -drawH / 2, drawW, drawH);
+    ctx.restore();
+  }
+
+  function renderLiveMiniCanvas() {
+    if (!cropperLivePreviewCanvas) return;
+    drawFramedImageOnCanvas(cropperLivePreviewCanvas);
+  }
+
+  // Validate and Apply Crop
+  btnApplyCropper?.addEventListener('click', () => {
+    if (!cropperSourceImg.src) return;
+
+    // High definition export canvas
+    const exportCanvas = document.createElement('canvas');
+    let targetWidth = 1400;
+    let targetHeight = 1400;
+
+    if (cropState.ratio === '1:1') {
+      targetWidth = 1400; targetHeight = 1400;
+    } else if (cropState.ratio === '3:4') {
+      targetWidth = 1200; targetHeight = 1600;
+    } else if (cropState.ratio === '16:9') {
+      targetWidth = 1600; targetHeight = 900;
+    } else {
+      const Vw = cropperViewport.offsetWidth || 360;
+      const Vh = cropperViewport.offsetHeight || 360;
+      targetWidth = 1400;
+      targetHeight = Math.round(1400 * (Vh / Vw));
+    }
+
+    exportCanvas.width = targetWidth;
+    exportCanvas.height = targetHeight;
+
+    drawFramedImageOnCanvas(exportCanvas);
+
+    try {
+      const croppedDataUrl = exportCanvas.toDataURL('image/jpeg', 0.94);
+      imageUrlInput.value = croppedDataUrl;
+      updateLiveSimulationCards(croppedDataUrl);
+      if (cropStatusBadge) cropStatusBadge.style.display = 'inline-flex';
+      if (btnResetCropImage) btnResetCropImage.style.display = 'inline-flex';
+      closeCropperModal();
+      showAdminToast("✨ Visuel recadré et adapté au catalogue avec succès !");
+    } catch (e) {
+      console.error('Error generating cropped canvas:', e);
+      alert("Une erreur est survenue lors de l'export du recadrage.");
     }
   });
 

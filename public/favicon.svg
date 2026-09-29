@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgSatin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#09090c"/>
+      <stop offset="50%" stop-color="#050507"/>
+      <stop offset="100%" stop-color="#020204"/>
+    </linearGradient>
+    <linearGradient id="mWhiteGlow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <filter id="mDropGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="18" flood-color="#2563eb" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Deep Obsidian Black Square Frame (Modern Squircle / Rounded Square) -->
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="url(#bgSatin)" stroke="#27272a" stroke-width="8"/>
+  
+  <!-- Subtle Internal Architectural Accent Stroke -->
+  <rect x="22" y="22" width="468" height="468" rx="98" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="2"/>
+
+  <!-- Iconic Pure Geometric 'M' crafted exactly to Syne Extra-Bold 800 proportions -->
+  <path d="M 116 386 L 116 126 L 194 126 L 256 264 L 318 126 L 396 126 L 396 386 L 334 386 L 334 230 L 278 350 L 234 350 L 178 230 L 178 386 Z" fill="url(#mWhiteGlow)" filter="url(#mDropGlow)"/>
+
+  <!-- Micro Cyan-Cobalt Identity Point on the Bottom Right -->
+  <circle cx="410" cy="410" r="14" fill="#38bdf8"/>
+</svg>
