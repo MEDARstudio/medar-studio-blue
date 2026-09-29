@@ -293,14 +293,31 @@ function renderApp() {
           </div>
         </a>
 
-        <nav class="main-nav">
-          <ul>
-            <li><a href="#home" id="navHomeLink">Home</a></li>
-            <li><a href="#work" id="navWorkLink">Selected Work</a></li>
-            <li><a href="#about" id="navAboutLink">About Studio</a></li>
-            <li><a href="#contact" id="navContactLink">Contact</a></li>
-            <li><a href="#all-projects" class="nav-cta" id="navAllProjectsLink">All Projects</a></li>
+        <nav class="main-nav" id="mainNav">
+          <ul class="nav-links-list">
+            <li><a href="#home" id="navHomeLink"><span class="nav-num">01</span><span>Home</span></a></li>
+            <li><a href="#work" id="navWorkLink"><span class="nav-num">02</span><span>Selected Work</span></a></li>
+            <li><a href="#about" id="navAboutLink"><span class="nav-num">03</span><span>About Studio</span></a></li>
+            <li><a href="#contact" id="navContactLink"><span class="nav-num">04</span><span>Contact</span></a></li>
+            <li><a href="#all-projects" class="nav-cta" id="navAllProjectsLink"><span class="nav-num">05</span><span>All Projects</span><i class="fas fa-arrow-right"></i></a></li>
           </ul>
+
+          <div class="mobile-nav-footer">
+            <div class="mobile-nav-status">
+              <span class="status-dot"></span>
+              <span>Available for Creative Direction Worldwide</span>
+            </div>
+            <a href="${settingsData.whatsappUrl}" target="_blank" rel="noopener noreferrer" class="mobile-nav-wa-btn">
+              <i class="fab fa-whatsapp"></i>
+              <span>WhatsApp Direct · ${settingsData.whatsappNumber}</span>
+            </a>
+            <div class="mobile-nav-sub-row">
+              <a href="mailto:${settingsData.email}" class="mobile-nav-email">
+                <i class="fas fa-envelope"></i> ${settingsData.email}
+              </a>
+              <span class="mobile-nav-location"><i class="fas fa-globe"></i> GMT+1</span>
+            </div>
+          </div>
         </nav>
 
         <button class="mobile-nav-toggle" aria-label="Navigation Menu" aria-expanded="false">
@@ -2851,21 +2868,36 @@ function setupHeader() {
 function setupNavigation() {
   const toggle = document.querySelector('.mobile-nav-toggle');
   const header = document.querySelector('.header');
+  const mainNav = document.getElementById('mainNav');
+
+  function closeMobileNav() {
+    if (header?.classList.contains('nav-open')) {
+      header.classList.remove('nav-open');
+      document.body.classList.remove('nav-lock-scroll');
+      toggle?.setAttribute('aria-expanded', 'false');
+      if (toggle) toggle.innerHTML = '<i class="fas fa-bars"></i>';
+    }
+  }
+
   if (toggle && header) {
     toggle.addEventListener('click', () => {
       const isOpen = header.classList.toggle('nav-open');
       toggle.setAttribute('aria-expanded', isOpen);
       toggle.innerHTML = isOpen ? '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+      document.body.classList.toggle('nav-lock-scroll', isOpen);
     });
   }
 
+  // Close when tapping outside header/nav on mobile
+  document.addEventListener('click', (e) => {
+    if (header?.classList.contains('nav-open') && !header.contains(e.target)) {
+      closeMobileNav();
+    }
+  });
+
   document.querySelectorAll('.main-nav a').forEach(anchor => {
     anchor.addEventListener('click', (e) => {
-      if (header?.classList.contains('nav-open')) {
-        header.classList.remove('nav-open');
-        toggle?.setAttribute('aria-expanded', 'false');
-        if (toggle) toggle.innerHTML = '<i class="fas fa-bars"></i>';
-      }
+      closeMobileNav();
 
       const href = anchor.getAttribute('href');
       if (href && href.startsWith('#')) {
